@@ -1,14 +1,27 @@
 {
   "name": "tonka-router",
-  "version": "1.0.0",
+  "version": "1.10.0",
   "description": "Tonka Router is a lightweight client-side routing library for React applications. It provides a simple and intuitive API for generating URLs based on named routes defined in your backend, making it easy to manage navigation and links in your React projects. With Tonka Router, you can easily create dynamic URLs, handle route parameters, and keep your frontend routing in sync with your backend routes.",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "types",
+    "test"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/clicalmani/tonka-router.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
   },
   "keywords": [
     "Tonka",
