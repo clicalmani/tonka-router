@@ -53,7 +53,10 @@ const Spark = function() {
         return `${basePath}/${uri}${queryString ? '?' + queryString : ''}`;
     }
 
-    const current = function() {
+    const current = function(name: string|null = null) {
+        if (name) {
+            return window.currentRoute?.name === name ? window.currentRoute : null;
+        }
         return window.currentRoute;
     }
 

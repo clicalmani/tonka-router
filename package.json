@@ -1,7 +1,7 @@
 {
   "name": "tonka-router",
-  "version": "1.10.0",
-  "description": "Tonka Router is a lightweight client-side routing library for React applications. It provides a simple and intuitive API for generating URLs based on named routes defined in your backend, making it easy to manage navigation and links in your React projects. With Tonka Router, you can easily create dynamic URLs, handle route parameters, and keep your frontend routing in sync with your backend routes.",
+  "version": "1.11.0",
+  "description": "Bring the power of your Tonka Framework named routes to your JavaScript frontend. This package allows you to use your backend route definitions to generate URLs in your React or Vue (Inertia JS) application. It works exactly like Laravel's Ziggy, ensuring your frontend links never break when you change a route URI.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
