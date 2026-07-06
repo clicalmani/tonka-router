@@ -1,6 +1,6 @@
 {
   "name": "tonka-router",
-  "version": "1.11.0",
+  "version": "1.11.6",
   "description": "Bring the power of your Tonka Framework named routes to your JavaScript frontend. This package allows you to use your backend route definitions to generate URLs in your React or Vue (Inertia JS) application. It works exactly like Laravel's Ziggy, ensuring your frontend links never break when you change a route URI.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,7 +13,8 @@
     "test"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,9 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "vitest": "^4.1.8",
+    "react": "^18.0.0"
   },
   "keywords": [
     "Tonka",
@@ -33,5 +36,8 @@
   "bugs": {
     "url": "https://github.com/clicalmani/tonka-router/issues"
   },
-  "homepage": "https://github.com/clicalmani/tonka-router#readme"
+  "homepage": "https://github.com/clicalmani/tonka-router#readme",
+  "dependencies": {
+    "vitest": "^4.1.8"
+  }
 }

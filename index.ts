@@ -7,41 +7,51 @@ const Spark = function() {
     let currentRoute: CurrentRoute | null = null;
 
     const route = function(name: string, params: string[]|object = {}) {
-        const routeDef = routesConfig.routes ? routesConfig.routes[name]: null;
+        const routeDef = routesConfig.routes ? routesConfig.routes[name] : null;
         
         if (!routeDef) {
             console.error(`Route "${name}" not found.`);
             return '#';
         }
 
-        let uri = routeDef.uri; // ex: "users/:id"
-        const routeParams = routeDef.parameters || [];
+        let uri = routeDef.uri;
 
-        // Parameter normalization: we accept object or positional array
+        const routeParams: string[] = routeDef.parameters || [];
+
+        // Extraire tous les paramètres de l'URI (requis + optionnels)
+        const uriParams: string[] = (uri.match(/\/\??:([a-zA-Z_][a-zA-Z0-9_]*)/g) || [])
+                                        .map(p => p.replace(/^\/\??:/, ''));
+
+        // Union des deux pour avoir la liste complète
+        const allParams = [...new Set([...routeParams, ...uriParams])];
+
         const normalizedParams: Record<string, any> = Array.isArray(params)
-            ? Object.fromEntries(routeParams.map((name, i) => [name, params[i]]))
+            ? Object.fromEntries(allParams.map((n, i) => [n, params[i]]))
             : params;
         
-        // Replacing required parameters in the URI
-        for (const n of routeParams) {
+        for (const n of allParams) {
             const value = normalizedParams[n];
-            const regex = new RegExp(`:${n}`, 'g');
-            
+
             if (value !== undefined && value !== null) {
-                uri = uri.replace(regex, encodeURIComponent(value));
+                uri = uri.replace(new RegExp(`\\/\\?:${n}|\\/:${n}`, 'g'), '/' + encodeURIComponent(value));
             } else {
-                console.warn(`Missing required parameter "${n}" for route "${n}"`);
-                uri = uri.replace(regex, ''); // ou tu peux laisser le placeholder
+                if (uri.includes(`/?:${n}`)) {
+                    // Optionnel absent → on supprime le segment
+                    uri = uri.replace(`/?:${n}`, '');
+                } else {
+                    // Requis absent → warn
+                    console.warn(`Missing required parameter "${n}" for route "${name}"`);
+                    uri = uri.replace(`/:${n}`, '');
+                }
             }
         }
 
-        // Query string handling for everything that is not a route parameter
-        const queryKeys = Object.keys(normalizedParams).filter(k => !routeParams.includes(k));
+        // Seuls les keys qui ne sont ni dans routeParams ni dans uriParams → query string
+        const queryKeys = Object.keys(normalizedParams).filter(k => !allParams.includes(k));
         const searchParams = new URLSearchParams();
         
         for (const key of queryKeys) {
             const value = normalizedParams[key];
-
             if (value !== undefined && value !== null) {
                 searchParams.append(key, String(value));
             }
@@ -50,7 +60,8 @@ const Spark = function() {
         const queryString = searchParams.toString();
         const basePath = routesConfig.url || '';
         
-        return `${basePath}/${uri}${queryString ? '?' + queryString : ''}`;
+        // L'URI commence déjà par '/', donc pas de '/' supplémentaire
+        return `${basePath}${uri}${queryString ? '?' + queryString : ''}`;
     }
 
     const current = function(name: string|null = null) {
@@ -69,34 +80,23 @@ const Spark = function() {
         for (const name in parameters) {
             const value = parameters[name];
             const regex = new RegExp(`:${name}`, 'g');
-
             if (value !== undefined && value !== null) {
                 url = url.replace(regex, encodeURIComponent(value));
             }
         }
 
-        const basePath = routesConfig.url || '';
-
-        return `${basePath}/${url}`;
+        return `${routesConfig.url || ''}/${url}`;
     }
 
-    /**
-     * React hook to generate URLs based on a route configuration (Ziggy style).
-     * 
-     * @param {Object} [configOverride] - Optional: A complete configuration object to override the DOM one.
-     * @returns {Function} - A route(name, params) function to generate URLs.
-     */
     const useRoute = (configOverride = null) => {
-        // Retrieving and processing the configuration
-        // We use useMemo to avoid re-parsing the JSON on each render
-        routesConfig = useMemo(() => {
-            // If a configuration is passed explicitly, it is used (useful for testing or SSR).
-            if (configOverride) {
-                return configOverride;
+        // useMemo(() => {
+        //     if (configOverride) {
+        //         routesConfig = configOverride;
+        //     }
+        // }, [configOverride]);
+        if (configOverride) {
+                routesConfig = configOverride;
             }
-
-            return routesConfig;
-        }, [configOverride]);
 
         return route;
     }
@@ -116,7 +116,7 @@ const Spark = function() {
                 currentRoute = JSON.parse(rootEl.dataset.currentroute || 'null');
 
                 window.routesConfig = routesConfig;
-                window.currentRoute = currentRoute !;
+                window.currentRoute = currentRoute!;
             } catch (error) {
                 throw new Error("init: The contents of 'data-routes' are not valid JSON.");
             }
@@ -128,22 +128,13 @@ const Spark = function() {
     }
 }();
 
-if (document.readyState === 'loading') {
-    // Loading phase: Wait for the event
-    document.addEventListener('DOMContentLoaded', Spark.init);
-} else {
-    // DOM is already ready (interactive or complete)
-    Spark.init();
-}
+// if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', Spark.init);
+// } else {
+//     Spark.init();
+// }
 
-const route = Spark.route
-const current = Spark.current
-const currentUrl = Spark.currentUrl
-const useRoute = Spark.useRoute
-
-export {
-    route,
-    current,
-    currentUrl,
-    useRoute
-}
+export const route = Spark.route;
+export const current = Spark.current;
+export const currentUrl = Spark.currentUrl;
+export const useRoute = Spark.useRoute;

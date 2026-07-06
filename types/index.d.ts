@@ -8,6 +8,7 @@ export interface CurrentRoute {
 type RouteDef = {
     uri: string;
     parameters: string[];
+    methods: ("get" | "post" | "patch" | "put" | "delete")[];
 }
 
 export interface RoutesConfig {
